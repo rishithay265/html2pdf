@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,113 +9,335 @@
   :root{
     --bg:#f7f7f8;--accent:#4f46e5;--accent-hover:#4338ca;
     --border:#e0e0e2;--text:#1a1a1c;--mono:#2f2f33;
-    --radius:8px;--shadow:0 2px 8px rgba(0,0,0,.06)
+    --radius:8px;--shadow:0 2px 8px rgba(0,0,0,.06);
+    --success:#10b981;--error:#ef4444;
   }
   *{box-sizing:border-box;margin:0;padding:0;
     font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
   body{background:var(--bg);color:var(--text);
-    padding:3rem 1rem;display:flex;justify-content:center}
+    padding:3rem 1rem;display:flex;justify-content:center;min-height:100vh}
   .wrapper{width:100%;max-width:960px;background:#fff;
     border:1px solid var(--border);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:2rem;display:grid;gap:1.5rem}
-  h1{font-size:1.5rem;font-weight:600;text-align:center}
+    box-shadow:var(--shadow);padding:2rem;display:grid;gap:1.5rem;align-self:start}
+  h1{font-size:1.5rem;font-weight:600;text-align:center;color:var(--accent)}
   textarea{width:100%;height:320px;resize:vertical;padding:1rem;
     border:1px solid var(--border);border-radius:var(--radius);
-    font-family:Menlo,Consolas,monospace;font-size:.9rem;line-height:1.5}
-  .controls{display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap}
+    font-family:Menlo,Consolas,monospace;font-size:.9rem;line-height:1.5;
+    transition:border-color 0.2s}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .controls{display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;align-items:center}
   button{cursor:pointer;background:var(--accent);color:#fff;border:none;
     border-radius:var(--radius);padding:.75rem 1.25rem;font-size:.95rem;
-    font-weight:500;transition:.15s}
-  button:hover{background:var(--accent-hover)}
-  button:disabled{opacity:.6;cursor:not-allowed}
+    font-weight:500;transition:all .2s;min-width:120px}
+  button:hover:not(:disabled){background:var(--accent-hover);transform:translateY(-1px)}
+  button:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  button.success{background:var(--success)}
+  button.error{background:var(--error)}
   .previewBox{border:1px dashed var(--border);border-radius:var(--radius);
-    padding:1rem;min-height:150px;background:#fafafa;overflow:auto}
-  label{font-weight:600;margin-bottom:.25rem;display:block}
+    padding:1rem;min-height:150px;background:#fafafa;overflow:auto;
+    transition:border-color 0.2s}
+  .previewBox:not(:empty){border-style:solid}
+  label{font-weight:600;margin-bottom:.25rem;display:block;color:var(--text)}
+  .status{font-size:.85rem;color:var(--accent);font-weight:500}
+  .loading{
+    display:inline-block;
+    width:16px;height:16px;
+    border:2px solid transparent;
+    border-top:2px solid currentColor;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin-right:.5rem;
+  }
+  @keyframes spin{
+    0%{transform:rotate(0deg)}
+    100%{transform:rotate(360deg)}
+  }
+  .sample-link{
+    color:var(--accent);text-decoration:none;font-size:.9rem;
+    border:1px solid var(--border);padding:.5rem 1rem;border-radius:var(--radius);
+    background:#f9f9fb;transition:all .2s;
+  }
+  .sample-link:hover{background:var(--accent);color:white;text-decoration:none}
   @media (prefers-color-scheme:dark){
     :root{--bg:#141414;--text:#e5e5e5;--border:#333;
       --accent:#6366f1;--accent-hover:#818cf8;--mono:#e5e5e5}
     .wrapper{background:#1c1c1f}
-    textarea{background:#121214;color:var(--mono)}
-    .previewBox{background:#19191c}
+    textarea{background:#121214;color:var(--mono);border-color:#333}
+    .previewBox{background:#19191c;border-color:#333}
+    .sample-link{background:#2a2a2e;border-color:#333;color:var(--text)}
+  }
+  @media (max-width:640px){
+    .controls{flex-direction:column;align-items:stretch}
+    button{min-width:auto}
   }
 </style>
 </head>
 <body>
   <div class="wrapper">
-    <h1>HTML → PDF Converter</h1>
+    <h1>✨ HTML → PDF Converter</h1>
 
-    <div>
-      <label for="htmlInput">Paste or edit your HTML</label>
-      <textarea id="htmlInput" placeholder="&lt;h2&gt;Hello World&lt;/h2&gt;&#10;&lt;p&gt;This will appear in the PDF.&lt;/p&gt;"></textarea>
-    </div>
+```
+<div>
+  <label for="htmlInput">Paste or edit your HTML</label>
+  <textarea id="htmlInput" placeholder="<h2>Welcome to PDF Converter!</h2>&#10;<p>Type your HTML here and click Preview to see it rendered.</p>&#10;<p>Then click Download PDF to save it as a PDF file.</p>&#10;&#10;<h3>Features:</h3>&#10;<ul>&#10;  <li>Real-time preview</li>&#10;  <li>High-quality PDF output</li>&#10;  <li>Responsive design</li>&#10;</ul>"></textarea>
+</div>
 
-    <div class="controls">
-      <button id="previewBtn" type="button">Preview</button>
-      <button id="downloadBtn" type="button">Download PDF</button>
-    </div>
+<div class="controls">
+  <a href="#" class="sample-link" id="sampleBtn">Load Sample HTML</a>
+  <div class="status" id="statusMsg"></div>
+  <button id="previewBtn" type="button">🔍 Preview</button>
+  <button id="downloadBtn" type="button">📄 Download PDF</button>
+</div>
 
-    <div>
-      <label>Live Preview (this area is what will be turned into PDF)</label>
-      <div id="previewBox" class="previewBox"></div>
-    </div>
+<div>
+  <label>Live Preview</label>
+  <div id="previewBox" class="previewBox">
+    <p style="font-style:italic;color:#666;text-align:center;padding:2rem">
+      Preview will appear here when you click the Preview button...
+    </p>
+  </div>
+</div>
+```
+
   </div>
 
-<!-- Bundled html2pdf (includes jsPDF & html2canvas) -->
+<!-- html2pdf.js library -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
         integrity="sha512-YcsIPoNDH9q/SnBMm0RzFg4BGceGM33uR8xJt5cpHq+Bc3BouXBzECZRblMylE55fc8ytdfmxFjYvEgsrw0Jog=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
 (() => {
-  const inputEl     = document.getElementById('htmlInput');
-  const previewBox  = document.getElementById('previewBox');
-  const previewBtn  = document.getElementById('previewBtn');
+  'use strict';
+  
+  // DOM elements
+  const inputEl = document.getElementById('htmlInput');
+  const previewBox = document.getElementById('previewBox');
+  const previewBtn = document.getElementById('previewBtn');
   const downloadBtn = document.getElementById('downloadBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const sampleBtn = document.getElementById('sampleBtn');
 
-  // Keep preview in sync
+  // Sample HTML content
+  const sampleHTML = `<div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+  <h1 style="color: #4f46e5; text-align: center; border-bottom: 3px solid #4f46e5; padding-bottom: 10px;">
+    📄 Sample Document
+  </h1>
+  
+  <h2 style="color: #333; margin-top: 30px;">Introduction</h2>
+  <p style="line-height: 1.6; color: #555;">
+    This is a sample HTML document that demonstrates various formatting options. 
+    You can edit this content and generate a PDF from it.
+  </p>
+  
+  <h2 style="color: #333; margin-top: 25px;">Features List</h2>
+  <ul style="line-height: 1.8; color: #555;">
+    <li><strong>Rich Text Formatting:</strong> Bold, italic, and colored text</li>
+    <li><strong>Lists:</strong> Both ordered and unordered lists</li>
+    <li><strong>Tables:</strong> Data presentation in tabular format</li>
+    <li><strong>Custom Styling:</strong> CSS styles are preserved</li>
+  </ul>
+  
+  <h2 style="color: #333; margin-top: 25px;">Sample Table</h2>
+  <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+    <thead>
+      <tr style="background-color: #f8f9fa;">
+        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Item</th>
+        <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Description</th>
+        <th style="border: 1px solid #ddd; padding: 12px; text-align: right;">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border: 1px solid #ddd; padding: 8px;">Product A</td>
+        <td style="border: 1px solid #ddd; padding: 8px;">High-quality widget</td>
+        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">$29.99</td>
+      </tr>
+      <tr style="background-color: #f8f9fa;">
+        <td style="border: 1px solid #ddd; padding: 8px;">Product B</td>
+        <td style="border: 1px solid #ddd; padding: 8px;">Premium service</td>
+        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">$49.99</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <div style="background-color: #e0f2fe; border-left: 4px solid #0288d1; padding: 15px; margin: 20px 0;">
+    <h3 style="margin: 0 0 10px 0; color: #0277bd;">💡 Pro Tip</h3>
+    <p style="margin: 0; color: #0277bd;">
+      You can include any HTML content here. The PDF generator will preserve most CSS styling!
+    </p>
+  </div>
+  
+  <p style="text-align: center; margin-top: 40px; color: #888; font-style: italic;">
+    Generated on ${new Date().toLocaleDateString()} using HTML to PDF Converter
+  </p>
+</div>`;
+
+  // Status message utility
+  const setStatus = (message, type = 'info') => {
+    statusMsg.textContent = message;
+    statusMsg.className = `status ${type}`;
+    if (type !== 'info') {
+      setTimeout(() => setStatus(''), 3000);
+    }
+  };
+
+  // Button state utility
+  const setButtonState = (button, state, text) => {
+    button.disabled = state === 'loading';
+    button.className = state === 'loading' ? '' : state;
+    
+    if (state === 'loading') {
+      button.innerHTML = `<span class="loading"></span>${text}`;
+    } else {
+      button.textContent = text;
+    }
+  };
+
+  // Preview rendering function
   const renderPreview = () => {
-    const markup = inputEl.value.trim() ||
-      '<p style="font-style:italic;color:#666">Preview will appear here…</p>';
-    previewBox.innerHTML = markup;
+    try {
+      const markup = inputEl.value.trim();
+      if (!markup) {
+        previewBox.innerHTML = '<p style="font-style:italic;color:#666;text-align:center;padding:2rem">Enter some HTML content to see the preview...</p>';
+        setStatus('');
+        return;
+      }
+      
+      previewBox.innerHTML = markup;
+      setStatus('Preview updated successfully', 'success');
+      
+      // Scroll preview into view on mobile
+      if (window.innerWidth <= 640) {
+        previewBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    } catch (error) {
+      console.error('Preview error:', error);
+      previewBox.innerHTML = '<p style="color:red;text-align:center;padding:2rem">⚠️ Error rendering preview. Please check your HTML syntax.</p>';
+      setStatus('Preview error - check HTML syntax', 'error');
+    }
   };
-  renderPreview();                 // initial
+
+  // PDF download function
+  const downloadPDF = async () => {
+    try {
+      // Ensure preview is current
+      renderPreview();
+      
+      // Check if there's content to convert
+      const content = inputEl.value.trim();
+      if (!content) {
+        setStatus('Please enter some HTML content first', 'error');
+        return;
+      }
+
+      setButtonState(downloadBtn, 'loading', 'Generating PDF...');
+      setStatus('Creating PDF... This may take a moment');
+
+      // Configure PDF options
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `document_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { 
+          type: 'jpeg', 
+          quality: 0.98 
+        },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          allowTaint: false
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          putOnlyUsedFonts: true,
+          floatPrecision: 16
+        }
+      };
+
+      // Method 1: Use the built-in save functionality (most reliable)
+      try {
+        await html2pdf().set(opt).from(previewBox).save();
+        setStatus('PDF downloaded successfully!', 'success');
+        setButtonState(downloadBtn, 'success', '✅ Downloaded!');
+        setTimeout(() => setButtonState(downloadBtn, '', '📄 Download PDF'), 2000);
+      } catch (saveError) {
+        console.log('Built-in save failed, trying alternative method:', saveError);
+        
+        // Method 2: Alternative approach using outputPdf
+        const worker = html2pdf().set(opt).from(previewBox);
+        const pdfBlob = await worker.outputPdf('blob');
+        
+        // Create download link
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = opt.filename;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        
+        setStatus('PDF downloaded successfully!', 'success');
+        setButtonState(downloadBtn, 'success', '✅ Downloaded!');
+        setTimeout(() => setButtonState(downloadBtn, '', '📄 Download PDF'), 2000);
+      }
+
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      setStatus('Error generating PDF. Please try again.', 'error');
+      setButtonState(downloadBtn, 'error', '❌ Error');
+      setTimeout(() => setButtonState(downloadBtn, '', '📄 Download PDF'), 3000);
+    }
+  };
+
+  // Load sample content
+  const loadSample = (e) => {
+    e.preventDefault();
+    inputEl.value = sampleHTML;
+    renderPreview();
+    setStatus('Sample content loaded', 'success');
+  };
+
+  // Event listeners
   previewBtn.addEventListener('click', renderPreview);
-
-  // Utility: reliable file save (works around Safari/iOS quirk)
-  const saveBlob = (blob, filename) => {
-    // Edge / old IE
-    if (navigator.msSaveOrOpenBlob) return navigator.msSaveOrOpenBlob(blob, filename);
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.style.display = 'none';
-    link.href = url;
-    link.download = filename;
-
-    // For iOS Safari we must append to the DOM
-    document.body.appendChild(link);
-    link.click();
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
-  };
-
-  // Main download handler
-  downloadBtn.addEventListener('click', async () => {
-    renderPreview();  // ensure freshest HTML
-    const opt = {
-      margin:      10,
-      filename:    'export.pdf',
-      image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: window.devicePixelRatio || 2 },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    // html2pdf() returns a Promise-like object
-    const pdfBlob = await html2pdf().set(opt).from(previewBox).outputPdf('blob'); // <- get Blob
-    saveBlob(pdfBlob, 'export.pdf');
+  downloadBtn.addEventListener('click', downloadPDF);
+  sampleBtn.addEventListener('click', loadSample);
+  
+  // Auto-preview on input (debounced)
+  let previewTimeout;
+  inputEl.addEventListener('input', () => {
+    clearTimeout(previewTimeout);
+    previewTimeout = setTimeout(renderPreview, 500);
   });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'p') {
+        e.preventDefault();
+        downloadPDF();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        renderPreview();
+      }
+    }
+  });
+
+  // Initialize with sample content
+  inputEl.value = sampleHTML;
+  renderPreview();
+  setStatus('Ready to convert HTML to PDF');
+
 })();
 </script>
+
 </body>
 </html>
